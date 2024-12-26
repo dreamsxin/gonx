@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	gonx "github.com/satyrius/gonx"
+	gonx "github.com/dreamsxin/gonx"
 )
 
 var conf string

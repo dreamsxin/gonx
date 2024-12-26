@@ -1,4 +1,4 @@
-# gonx [![Build Status](https://travis-ci.org/satyrius/gonx.svg)](https://travis-ci.org/satyrius/gonx) [![Go Report Card](https://goreportcard.com/badge/github.com/satyrius/gonx)](https://goreportcard.com/report/github.com/satyrius/gonx)
+# gonx [![Build Status](https://travis-ci.org/satyrius/gonx.svg)](https://travis-ci.org/satyrius/gonx) [![Go Report Card](https://goreportcard.com/badge/github.com/dreamsxin/gonx)](https://goreportcard.com/report/github.com/dreamsxin/gonx)
 
 `gonx` is Nginx access log reader library for `Go`. In fact you can use it for any format.
 
@@ -48,7 +48,7 @@ I have a few benchmarks for parsing `string` log record into `Entry` using `gonx
 	BenchmarkParseSimpleLogRecord      100000            19457 ns/op
 	BenchmarkParseLogRecord             20000            84425 ns/op
 
-And here is some real wold stats. I got ~300Mb log file with ~700K records and process with [simple scripts](https://github.com/satyrius/gonx/tree/master/benchmarks).
+And here is some real wold stats. I got ~300Mb log file with ~700K records and process with [simple scripts](https://github.com/dreamsxin/gonx/tree/master/benchmarks).
 
 * Reading whole file line by line with `bufio.Scanner` without any other processing takes a *one second*.
 * Read in the same manner plus parsing with `gonx.Parser` takes *about 80 seconds*
@@ -81,7 +81,7 @@ capability will be supported for the following public interfaces.
 
 ## Changelog
 
-All major changes will be noticed in [release notes](https://github.com/satyrius/gonx/releases).
+All major changes will be noticed in [release notes](https://github.com/dreamsxin/gonx/releases).
 
 ## Roadmap
 

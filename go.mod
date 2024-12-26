@@ -1,4 +1,4 @@
-module github.com/satyrius/gonx
+module github.com/dreamsxin/gonx
 
 go 1.21
 

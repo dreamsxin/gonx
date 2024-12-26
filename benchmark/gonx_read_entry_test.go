@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/satyrius/gonx"
+	"github.com/dreamsxin/gonx"
 )
 
 func BenchmarkGonxReadEntry(b *testing.B) {
