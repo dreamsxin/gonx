@@ -1,9 +1,10 @@
 package gonx
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 	"time"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestFilter(t *testing.T) {
@@ -100,7 +101,7 @@ func TestFilter(t *testing.T) {
 			})
 
 			Convey("Filter channel", func() {
-				chain := NewChain(filter, &Avg{[]string{"foo"}}, &Count{})
+				chain := NewChain(filter, &Avg{map[string]string{"foo": "foo"}}, &Count{})
 				chain.Reduce(input, output)
 
 				result, ok := <-output
