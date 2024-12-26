@@ -48,17 +48,17 @@ func (r *Count) Reduce(input chan *Entry, output chan *Entry) {
 
 // Sum implements the Reducer interface for summarize Entry values for the given fields
 type Sum struct {
-	Fields []string
+	Fields map[string]string
 }
 
 // Reduce summarizes given Entry fields and return a map with result for each field.
 func (r *Sum) Reduce(input chan *Entry, output chan *Entry) {
 	sum := make(map[string]float64)
 	for entry := range input {
-		for _, name := range r.Fields {
+		for label, name := range r.Fields {
 			val, err := entry.FloatField(name)
 			if err == nil {
-				sum[name] += val
+				sum[label] += val
 			}
 		}
 	}
@@ -72,7 +72,7 @@ func (r *Sum) Reduce(input chan *Entry, output chan *Entry) {
 
 // Avg implements the Reducer interface for average entries values calculation
 type Avg struct {
-	Fields []string
+	Fields map[string]string
 }
 
 // Reduce calculates the average value for input channel Entries, using configured Fields
@@ -81,16 +81,70 @@ func (r *Avg) Reduce(input chan *Entry, output chan *Entry) {
 	avg := make(map[string]float64)
 	count := 0.0
 	for entry := range input {
-		for _, name := range r.Fields {
+		for label, name := range r.Fields {
 			val, err := entry.FloatField(name)
 			if err == nil {
-				avg[name] = (avg[name]*count + val) / (count + 1)
+				avg[label] = (avg[label]*count + val) / (count + 1)
 			}
 		}
 		count++
 	}
 	entry := NewEmptyEntry()
 	for name, val := range avg {
+		entry.SetFloatField(name, val)
+	}
+	output <- entry
+	close(output)
+}
+
+// Min implements the Reducer interface for min values calculation
+type Min struct {
+	Fields map[string]string
+}
+
+// Reduce calculates the min values for input channel Entries, using configured Fields
+// of the struct. Write result to the output channel as map[string]float64
+func (r *Min) Reduce(input chan *Entry, output chan *Entry) {
+	min := make(map[string]float64)
+	for entry := range input {
+		for label, name := range r.Fields {
+			val, err := entry.FloatField(name)
+			if err == nil {
+				if val < min[label] || min[label] == 0 {
+					min[label] = val
+				}
+			}
+		}
+	}
+	entry := NewEmptyEntry()
+	for name, val := range min {
+		entry.SetFloatField(name, val)
+	}
+	output <- entry
+	close(output)
+}
+
+// Max implements the Reducer interface for min values calculation
+type Max struct {
+	Fields map[string]string
+}
+
+// Reduce calculates the min values for input channel Entries, using configured Fields
+// of the struct. Write result to the output channel as map[string]float64
+func (r *Max) Reduce(input chan *Entry, output chan *Entry) {
+	max := make(map[string]float64)
+	for entry := range input {
+		for label, name := range r.Fields {
+			val, err := entry.FloatField(name)
+			if err == nil {
+				if val > max[label] {
+					max[label] = val
+				}
+			}
+		}
+	}
+	entry := NewEmptyEntry()
+	for name, val := range max {
 		entry.SetFloatField(name, val)
 	}
 	output <- entry

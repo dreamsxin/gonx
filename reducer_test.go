@@ -1,8 +1,9 @@
 package gonx
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestReducer(t *testing.T) {
@@ -66,7 +67,7 @@ func TestReducer(t *testing.T) {
 			})
 
 			Convey("Sum reducer", func() {
-				reducer := &Sum{[]string{"foo", "bar"}}
+				reducer := &Sum{map[string]string{"foo": "foo", "bar": "bar"}}
 				reducer.Reduce(input, output)
 
 				result, ok := <-output
@@ -85,7 +86,7 @@ func TestReducer(t *testing.T) {
 			})
 
 			Convey("Avg reducer", func() {
-				reducer := &Avg{[]string{"foo", "bar"}}
+				reducer := &Avg{map[string]string{"foo": "foo", "bar": "bar"}}
 				reducer.Reduce(input, output)
 
 				result, ok := <-output
@@ -104,7 +105,7 @@ func TestReducer(t *testing.T) {
 			})
 
 			Convey("Chain reducer", func() {
-				reducer := NewChain(&Avg{[]string{"foo", "bar"}}, &Count{})
+				reducer := NewChain(&Avg{map[string]string{"foo": "foo", "bar": "bar"}}, &Count{})
 				So(len(reducer.reducers), ShouldEqual, 2)
 				reducer.Reduce(input, output)
 
@@ -132,7 +133,7 @@ func TestReducer(t *testing.T) {
 					// Fields to group by
 					[]string{"host"},
 					// Result reducers
-					&Sum{[]string{"foo", "bar"}},
+					&Sum{map[string]string{"foo": "foo", "bar": "bar"}},
 					new(Count),
 				)
 				So(len(reducer.reducers), ShouldEqual, 2)
