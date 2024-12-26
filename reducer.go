@@ -28,6 +28,7 @@ func (r *ReadAll) Reduce(input chan *Entry, output chan *Entry) {
 
 // Count implements the Reducer interface to count entries
 type Count struct {
+	Label string
 }
 
 // Reduce simply counts entries and write a sum to the output channel
@@ -41,7 +42,11 @@ func (r *Count) Reduce(input chan *Entry, output chan *Entry) {
 		count++
 	}
 	entry := NewEmptyEntry()
-	entry.SetUintField("count", count)
+	if r.Label != "" {
+		entry.SetUintField(r.Label, count)
+	} else {
+		entry.SetUintField("count", count)
+	}
 	output <- entry
 	close(output)
 }
