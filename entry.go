@@ -70,7 +70,11 @@ func (entry *Entry) IntField(name string) (value int, err error) {
 func (entry *Entry) EntryField(name string) (value *Entry, err error) {
 	tmp, err := entry.Field(name)
 	if err == nil {
-		err = json.Unmarshal([]byte(tmp), &value)
+		fields := make(Fields)
+		err = json.Unmarshal([]byte(tmp), &fields)
+		if err == nil {
+			value = NewEntry(fields)
+		}
 	}
 	return
 }
@@ -95,7 +99,7 @@ func (entry *Entry) SetUintField(name string, value uint64) {
 
 // SetField sets the value of a Entry
 func (entry *Entry) SetEntryField(name string, value *Entry) {
-	b, _ := json.Marshal(value)
+	b, _ := json.Marshal(value.Fields)
 	entry.Fields[name] = string(b)
 }
 

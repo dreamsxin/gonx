@@ -269,11 +269,11 @@ func TestHistogramReducer(t *testing.T) {
 
 				valuestr, err := result.Field("foo")
 				So(err, ShouldBeNil)
-				So(valuestr, ShouldEqual, `{"Fields":{"mean":"4.00","p10":"0.00","p5":"0.00","p50":"1.00","p90":"4.00","p95":"4.00","p99":"4.00","stddev":"2.45","total":"3.00"}}`)
+				So(valuestr, ShouldEqual, `{"mean":"4.00","p10":"0.00","p5":"0.00","p50":"1.00","p90":"4.00","p95":"4.00","p99":"4.00","stddev":"2.45","total":"3.00"}`)
 
 				valuestr, err = result.Field("bar")
 				So(err, ShouldBeNil)
-				So(valuestr, ShouldEqual, `{"Fields":{"mean":"5.00","p10":"0.00","p5":"0.00","p50":"2.00","p90":"5.00","p95":"5.00","p99":"5.00","stddev":"2.45","total":"3.00"}}`)
+				So(valuestr, ShouldEqual, `{"mean":"5.00","p10":"0.00","p5":"0.00","p50":"2.00","p90":"5.00","p95":"5.00","p99":"5.00","stddev":"2.45","total":"3.00"}`)
 			})
 
 		})
