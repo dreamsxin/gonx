@@ -1,6 +1,7 @@
 package gonx
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,7 +13,7 @@ type Fields map[string]string
 // Entry is a parsed log record. Use Get method to retrieve a value by name instead of
 // threating this as a map, because inner representation is in design.
 type Entry struct {
-	fields Fields
+	Fields Fields
 }
 
 // NewEmptyEntry creates an empty Entry to be filled later
@@ -25,15 +26,10 @@ func NewEntry(fields Fields) *Entry {
 	return &Entry{fields}
 }
 
-// Fields returns all fields of an entry
-func (entry *Entry) Fields() Fields {
-	return entry.fields
-}
-
 // Field returns an entry field value by name or empty string and error if it
 // does not exist.
 func (entry *Entry) Field(name string) (value string, err error) {
-	value, ok := entry.fields[name]
+	value, ok := entry.Fields[name]
 	if !ok {
 		err = fmt.Errorf("field '%v' does not found in record %+v", name, *entry)
 	}
@@ -70,10 +66,18 @@ func (entry *Entry) IntField(name string) (value int, err error) {
 	return
 }
 
+// EntryField returns an entry field value as Entry.
+func (entry *Entry) EntryField(name string) (value *Entry, err error) {
+	tmp, err := entry.Field(name)
+	if err == nil {
+		err = json.Unmarshal([]byte(tmp), &value)
+	}
+	return
+}
 
 // SetField sets the value of a field
 func (entry *Entry) SetField(name string, value string) {
-	entry.fields[name] = value
+	entry.Fields[name] = value
 }
 
 // SetFloatField is a Float field value setter. It accepts float64, but still store it as a
@@ -89,9 +93,15 @@ func (entry *Entry) SetUintField(name string, value uint64) {
 	entry.SetField(name, strconv.FormatUint(uint64(value), 10))
 }
 
+// SetField sets the value of a Entry
+func (entry *Entry) SetEntryField(name string, value *Entry) {
+	b, _ := json.Marshal(value)
+	entry.Fields[name] = string(b)
+}
+
 // Merge two entries by updating values for master entry with given.
 func (entry *Entry) Merge(merge *Entry) {
-	for name, value := range merge.fields {
+	for name, value := range merge.Fields {
 		entry.SetField(name, value)
 	}
 }

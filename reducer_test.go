@@ -104,6 +104,44 @@ func TestReducer(t *testing.T) {
 				So(err, ShouldNotBeNil)
 			})
 
+			Convey("Min reducer", func() {
+				reducer := &Min{map[string]string{"foo": "foo", "bar": "bar"}}
+				reducer.Reduce(input, output)
+
+				result, ok := <-output
+				So(ok, ShouldBeTrue)
+
+				value, err := result.FloatField("foo")
+				So(err, ShouldBeNil)
+				So(value, ShouldEqual, 1)
+
+				value, err = result.FloatField("bar")
+				So(err, ShouldBeNil)
+				So(value, ShouldEqual, 2)
+
+				_, err = result.Field("buz")
+				So(err, ShouldNotBeNil)
+			})
+
+			Convey("Max reducer", func() {
+				reducer := &Max{map[string]string{"foo": "foo", "bar": "bar"}}
+				reducer.Reduce(input, output)
+
+				result, ok := <-output
+				So(ok, ShouldBeTrue)
+
+				value, err := result.FloatField("foo")
+				So(err, ShouldBeNil)
+				So(value, ShouldEqual, 7)
+
+				value, err = result.FloatField("bar")
+				So(err, ShouldBeNil)
+				So(value, ShouldEqual, 8)
+
+				_, err = result.Field("buz")
+				So(err, ShouldNotBeNil)
+			})
+
 			Convey("Chain reducer", func() {
 				reducer := NewChain(&Avg{map[string]string{"foo": "foo", "bar": "bar"}}, &Count{})
 				So(len(reducer.reducers), ShouldEqual, 2)
@@ -179,6 +217,65 @@ func TestReducer(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(count, ShouldEqual, 2)
 			})
+		})
+	})
+}
+
+func TestHistogramReducer(t *testing.T) {
+	Convey("Test process input channel with reducers", t, func() {
+		input := make(chan *Entry, 10)
+
+		Convey("With filled input channel", func() {
+			// Prepare import channel
+			input <- NewEntry(Fields{
+				"uri":  "/asd/fgh",
+				"host": "alpha.example.com",
+				"foo":  "1",
+				"bar":  "2",
+			})
+			input <- NewEntry(Fields{
+				"uri":  "/zxc/vbn",
+				"host": "beta.example.com",
+				"foo":  "4",
+				"bar":  "5",
+			})
+			input <- NewEntry(Fields{
+				"uri":  "/ijk/lmn",
+				"host": "beta.example.com",
+				"foo":  "7",
+				"bar":  "8",
+			})
+			close(input)
+
+			output := make(chan *Entry, 10) // Make it buffered to avoid deadlock
+
+			Convey("Histogram reducer", func() {
+				reducer := &ReducerHistogram{Fields: map[string]string{"foo": "foo", "bar": "bar"}, Bins: map[string]*Bin{"foo": NewBin(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), "bar": NewBin(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)}}
+				reducer.Reduce(input, output)
+
+				result, ok := <-output
+				So(ok, ShouldBeTrue)
+
+				entry, err := result.EntryField("foo")
+				So(err, ShouldBeNil)
+
+				value, err := entry.FloatField("total")
+				So(err, ShouldBeNil)
+				So(value, ShouldEqual, 3)
+
+				// value, err = entry.FloatField("p10")
+				// So(err, ShouldBeNil)
+				// So(value, ShouldEqual, 7)
+
+				valuestr, err := result.Field("foo")
+				So(err, ShouldBeNil)
+				So(valuestr, ShouldEqual, `{"Fields":{"mean":"4.00","p10":"0.00","p5":"0.00","p50":"1.00","p90":"4.00","p95":"4.00","p99":"4.00","stddev":"2.45","total":"3.00"}}`)
+
+				valuestr, err = result.Field("bar")
+				So(err, ShouldBeNil)
+				So(valuestr, ShouldEqual, `{"Fields":{"mean":"5.00","p10":"0.00","p5":"0.00","p50":"2.00","p90":"5.00","p95":"5.00","p99":"5.00","stddev":"2.45","total":"3.00"}}`)
+			})
+
 		})
 	})
 }

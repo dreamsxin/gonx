@@ -13,7 +13,7 @@ func TestEntry(t *testing.T) {
 
 			Convey("Get all fields", func() {
 				// Get all fields
-				fields := entry.Fields()
+				fields := entry.Fields
 				So(fields, ShouldContainKey, "foo")
 				So(fields, ShouldContainKey, "bar")
 			})
@@ -154,7 +154,7 @@ func TestEntry(t *testing.T) {
 			entry := NewEntry(Fields{"foo": "1", "bar": "Hello world #1", "name": "alpha"})
 			partial := entry.Partial([]string{"name", "foo"})
 
-			So(len(partial.fields), ShouldEqual, 2)
+			So(len(partial.Fields), ShouldEqual, 2)
 			val, _ := partial.Field("name")
 			So(val, ShouldEqual, "alpha")
 			val, _ = partial.Field("foo")
