@@ -1,5 +1,7 @@
 package gonx
 
+import "fmt"
+
 // Reducer interface for Entries channel redure.
 //
 // Each Reduce method should accept input channel of Entries, do it's job and
@@ -255,5 +257,59 @@ func (r *GroupBy) Reduce(input chan *Entry, output chan *Entry) {
 		entry.Merge(<-ch)
 		output <- entry
 	}
+	close(output)
+}
+
+// Together implements the Reducer interface
+type Together struct {
+	Names    []string
+	reducers []Reducer
+}
+
+// NewChain creates a new chain of Reducers
+func NewTogether(names []string, reducers ...Reducer) *Together {
+
+	t := &Together{
+		Names:    names,
+		reducers: reducers,
+	}
+	return t
+}
+
+// Reduce applies a chain of reducers to the input channel of entries and merge results
+func (r *Together) Reduce(input chan *Entry, output chan *Entry) {
+	// Make input and output channel for each reducer
+	subInput := make([]chan *Entry, len(r.reducers))
+	subOutput := make([]chan *Entry, len(r.reducers))
+	for i, reducer := range r.reducers {
+		if i >= len(r.Names) {
+			r.Names = append(r.Names, fmt.Sprintf("result_%d", i))
+		}
+		subInput[i] = make(chan *Entry, cap(input))
+		subOutput[i] = make(chan *Entry, cap(output))
+		go reducer.Reduce(subInput[i], subOutput[i])
+	}
+
+	// Read reducer master input channel
+	for entry := range input {
+		// Publish input entry for each sub-reducers to process
+		if entry != nil {
+			for _, sub := range subInput {
+				sub <- entry
+			}
+		}
+	}
+	for _, ch := range subInput {
+		close(ch)
+	}
+
+	idx := 0
+	entry := NewEmptyEntry()
+	for _, result := range subOutput {
+		entry.SetEntryField(r.Names[idx], <-result)
+		idx++
+	}
+
+	output <- entry
 	close(output)
 }

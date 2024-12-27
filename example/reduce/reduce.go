@@ -93,6 +93,7 @@ func main() {
 			fmt.Printf("Parsed entry: %+v\n", res)
 		}
 	}
+
 	{
 		// Read given file or from STDIN
 		var logReader io.Reader

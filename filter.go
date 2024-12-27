@@ -57,3 +57,23 @@ func (i *Datetime) withinBounds(t time.Time) bool {
 	}
 	return false
 }
+
+// FilterFunc implements the Filter interface to filter Entries with custom filter function.
+type FilterFunc func(*Entry) *Entry
+
+// Reduce implements the Reducer interface. Go through input and apply FilterFunc.
+func (f FilterFunc) Filter(entry *Entry) (validEntry *Entry) {
+	if f == nil {
+		return
+	}
+	return f(entry)
+}
+
+func (f FilterFunc) Reduce(input chan *Entry, output chan *Entry) {
+	for entry := range input {
+		if valid := f.Filter(entry); valid != nil {
+			output <- valid
+		}
+	}
+	close(output)
+}
