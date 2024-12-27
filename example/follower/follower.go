@@ -55,7 +55,7 @@ func main() {
 		//log.Println(line.String())
 		entry, err := parser.ParseString(line.String())
 		if err == nil {
-			time_local, err := entry.Field("time_local")
+			time_local, err := entry.StringField("time_local")
 			if err != nil {
 				log.Println(err)
 				continue

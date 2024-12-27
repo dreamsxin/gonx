@@ -181,7 +181,7 @@ func TestReducer(t *testing.T) {
 				// from channel can be in any order, it depends on each reducer processing
 				resultMap := make(map[string]*Entry)
 				for result := range output {
-					value, err := result.Field("host")
+					value, err := result.StringField("host")
 					So(err, ShouldBeNil)
 					resultMap[value] = result
 				}

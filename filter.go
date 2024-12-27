@@ -22,7 +22,7 @@ type Datetime struct {
 
 // Filter checks a field value to be in desired datetime range.
 func (i *Datetime) Filter(entry *Entry) (validEntry *Entry) {
-	val, err := entry.Field(i.Field)
+	val, err := entry.StringField(i.Field)
 	if err != nil {
 		// TODO handle error
 		return

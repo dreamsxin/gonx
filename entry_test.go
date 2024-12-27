@@ -25,7 +25,7 @@ func TestEntry(t *testing.T) {
 				So(val, ShouldEqual, "1")
 
 				// Get field that does not exist
-				val, err = entry.Field("baz")
+				val, err = entry.StringField("baz")
 				So(err, ShouldNotBeNil)
 				So(val, ShouldEqual, "")
 			})
@@ -49,17 +49,17 @@ func TestEntry(t *testing.T) {
 
 			Convey("Get int64 values", func() {
 				// Get existings field
-				val, err := entry.IntField64("foo")
+				val, err := entry.Int64Field("foo")
 				So(err, ShouldBeNil)
 				So(val, ShouldEqual, 1)
 
 				// Type casting eror
-				val, err = entry.IntField64("bar")
+				val, err = entry.Int64Field("bar")
 				So(err, ShouldNotBeNil)
 				So(val, ShouldEqual, 0)
 
 				// Get field that does not exist
-				val, err = entry.IntField64("baz")
+				val, err = entry.Int64Field("baz")
 				So(err, ShouldNotBeNil)
 				So(val, ShouldEqual, 0)
 			})
@@ -101,14 +101,14 @@ func TestEntry(t *testing.T) {
 
 			Convey("Test set float Entry fields", func() {
 				entry.SetFloatField("foo", 123.4567)
-				val, err := entry.Field("foo")
+				val, err := entry.StringField("foo")
 				So(err, ShouldBeNil)
 				So(val, ShouldEqual, "123.46")
 			})
 
 			Convey("Test set uint Entry fields", func() {
 				entry.SetUintField("foo", 123)
-				val, err := entry.Field("foo")
+				val, err := entry.StringField("foo")
 				So(err, ShouldBeNil)
 				So(val, ShouldEqual, "123")
 			})
@@ -119,15 +119,15 @@ func TestEntry(t *testing.T) {
 			entry2 := NewEntry(Fields{"foo": "2", "bar": "hello", "name": "alpha"})
 			entry1.Merge(entry2)
 
-			val, err := entry1.Field("foo")
+			val, err := entry1.StringField("foo")
 			So(err, ShouldBeNil)
 			So(val, ShouldEqual, "2")
 
-			val, err = entry1.Field("bar")
+			val, err = entry1.StringField("bar")
 			So(err, ShouldBeNil)
 			So(val, ShouldEqual, "hello")
 
-			val, err = entry1.Field("name")
+			val, err = entry1.StringField("name")
 			So(err, ShouldBeNil)
 			So(val, ShouldEqual, "alpha")
 		})
