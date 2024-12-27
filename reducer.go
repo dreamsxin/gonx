@@ -1,7 +1,5 @@
 package gonx
 
-import "fmt"
-
 // Reducer interface for Entries channel redure.
 //
 // Each Reduce method should accept input channel of Entries, do it's job and
@@ -190,6 +188,7 @@ func (r *Chain) Reduce(input chan *Entry, output chan *Entry) {
 
 	// Read reducer master input channel
 	for entry := range input {
+
 		for _, f := range r.filters {
 			entry = f.Filter(entry)
 			if entry == nil {
@@ -262,54 +261,32 @@ func (r *GroupBy) Reduce(input chan *Entry, output chan *Entry) {
 
 // Together implements the Reducer interface
 type Together struct {
-	Names    []string
-	reducers []Reducer
+	Name    string
+	reducer Reducer
 }
 
-// NewChain creates a new chain of Reducers
-func NewTogether(names []string, reducers ...Reducer) *Together {
+func NewTogether(name string, reducer Reducer) *Together {
 
 	t := &Together{
-		Names:    names,
-		reducers: reducers,
+		Name:    name,
+		reducer: reducer,
 	}
 	return t
 }
 
-// Reduce applies a chain of reducers to the input channel of entries and merge results
 func (r *Together) Reduce(input chan *Entry, output chan *Entry) {
-	// Make input and output channel for each reducer
-	subInput := make([]chan *Entry, len(r.reducers))
-	subOutput := make([]chan *Entry, len(r.reducers))
-	for i, reducer := range r.reducers {
-		if i >= len(r.Names) {
-			r.Names = append(r.Names, fmt.Sprintf("result_%d", i))
-		}
-		subInput[i] = make(chan *Entry, cap(input))
-		subOutput[i] = make(chan *Entry, cap(output))
-		go reducer.Reduce(subInput[i], subOutput[i])
-	}
 
-	// Read reducer master input channel
-	for entry := range input {
-		// Publish input entry for each sub-reducers to process
-		if entry != nil {
-			for _, sub := range subInput {
-				sub <- entry
-			}
-		}
-	}
-	for _, ch := range subInput {
-		close(ch)
-	}
+	subOutput := make(chan *Entry, cap(output))
+	go r.reducer.Reduce(input, subOutput)
 
 	idx := 0
-	entry := NewEmptyEntry()
-	for _, result := range subOutput {
-		entry.SetEntryField(r.Names[idx], <-result)
+	allEntry := NewEmptyEntry()
+	list := []*Entry{}
+	for entry := range subOutput {
+		list = append(list, entry)
 		idx++
 	}
-
-	output <- entry
+	allEntry.SetEntryList(r.Name, list)
+	output <- allEntry
 	close(output)
 }

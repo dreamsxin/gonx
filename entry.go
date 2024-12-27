@@ -79,6 +79,21 @@ func (entry *Entry) EntryField(name string) (value *Entry, err error) {
 	return
 }
 
+func (entry *Entry) EntryList(name string) (values []*Entry, err error) {
+	tmp, err := entry.Field(name)
+	if err == nil {
+		values = []*Entry{}
+		list := []Fields{}
+		err = json.Unmarshal([]byte(tmp), &list)
+		if err == nil {
+			for _, fields := range list {
+				values = append(values, NewEntry(fields))
+			}
+		}
+	}
+	return
+}
+
 // SetField sets the value of a field
 func (entry *Entry) SetField(name string, value string) {
 	entry.Fields[name] = value
@@ -100,6 +115,16 @@ func (entry *Entry) SetUintField(name string, value uint64) {
 // SetField sets the value of a Entry
 func (entry *Entry) SetEntryField(name string, value *Entry) {
 	b, _ := json.Marshal(value.Fields)
+	entry.Fields[name] = string(b)
+}
+
+// SetField sets the value of a Entry
+func (entry *Entry) SetEntryList(name string, values []*Entry) {
+	list := []Fields{}
+	for _, value := range values {
+		list = append(list, value.Fields)
+	}
+	b, _ := json.Marshal(list)
 	entry.Fields[name] = string(b)
 }
 
